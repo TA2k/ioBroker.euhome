@@ -34,7 +34,7 @@ class Euhome extends utils.Adapter {
     this.session = {};
     this.json2iob = new Json2iob(this);
     this.requestClient = axios.create();
-    this.description = {
+    this.descriptions = {
       1: "POWER",
       2: "PLAY_PAUSE",
       3: "DIRECTION",
@@ -73,8 +73,8 @@ class Euhome extends utils.Adapter {
     this.subscribeStates("*");
 
     this.log.info("Login to Eufy Home");
-    await this.login();
-    if (this.session.token) {
+    const sid = await this.login();
+    if (sid) {
       await this.getDeviceList();
       await this.updateDevices();
       this.updateInterval = setInterval(async () => {
@@ -143,7 +143,7 @@ class Euhome extends utils.Adapter {
       uid: this.session.user_id,
       returnFullLoginResponse: "false",
     });
-    this.log.debug(sid);
+    return sid;
   }
 
   async getDeviceList() {
@@ -153,7 +153,7 @@ class Euhome extends utils.Adapter {
       const devicesArr = await this.tuyaCloud.request({ action: "tuya.m.my.group.device.list", gid: group.groupId });
       this.log.info(`Found ${devicesArr.length} devices`);
       for (const device of devicesArr) {
-        this.log.debug(`Device: ${device.name} (${device.devId})`);
+        this.log.info(`Device: ${device.name} (${device.devId})`);
         const id = device.devId;
 
         this.devices[id] = device;
@@ -174,13 +174,6 @@ class Euhome extends utils.Adapter {
           },
           native: {},
         });
-        await this.setObjectNotExistsAsync(id + ".status", {
-          type: "channel",
-          common: {
-            name: "Status",
-          },
-          native: {},
-        });
 
         const remoteArray = [{ command: "Refresh", name: "True = Refresh" }];
         remoteArray.forEach((remote) => {
@@ -197,7 +190,7 @@ class Euhome extends utils.Adapter {
             native: {},
           });
         });
-        await this.json2iob.parse(id, device, { forceIndex: true, write: true });
+        await this.json2iob.parse(id, device, { forceIndex: true, write: true, descriptions: this.descriptions });
         this.connectLocal(id, device.localKey);
       }
     }
@@ -205,54 +198,64 @@ class Euhome extends utils.Adapter {
 
   async connectLocal(id, localKey) {
     this.log.debug(`Connecting to ${id} with localKey ${localKey}`);
-    const device = new TuyAPI({
-      id: id,
-      key: localKey,
-      version: "3.3",
-      issueRefreshOnConnect: true,
-    });
-    this.tuyaDevices[id] = device;
-    // Find device on network
-    device.find().then(() => {
-      // Connect to device
-      device.connect();
-    });
-
-    // Add event listeners
-    device.on("connected", () => {
-      this.log.info("Connected to device!");
-    });
-
-    device.on("disconnected", () => {
-      this.log.info("Disconnected from device. Reconnect in 30s");
-      this.reconnectTimeout = setTimeout(() => {
-        if (!device.isConnected) {
-          this.log.info("Reconnecting to device...");
+    try {
+      const device = new TuyAPI({
+        id: id,
+        key: localKey,
+        version: "3.3",
+        issueRefreshOnConnect: true,
+      });
+      this.tuyaDevices[id] = device;
+      // Find device on network
+      device
+        .find()
+        .then(() => {
+          // Connect to device
           device.connect();
-        }
-      }, 30000);
-    });
+        })
+        .catch((error) => {
+          this.log.error(`Error! ${error}`);
+        });
 
-    device.on("error", (error) => {
-      this.log.error(`Error! ${error}`);
-    });
-    device.on("dp-refresh", (data) => {
-      this.log.debug(data);
-      this.json2iob.parse(id, data, { forceIndex: true, write: true });
-    });
+      // Add event listeners
+      device.on("connected", () => {
+        this.log.info("Connected to device!");
+      });
 
-    device.on("data", (data) => {
-      this.log.debug(data);
-      this.json2iob.parse(id, data, { forceIndex: true, write: true });
+      device.on("disconnected", () => {
+        this.log.info("Disconnected from device. Reconnect in 30s");
+        this.reconnectTimeout = setTimeout(() => {
+          if (!device.isConnected) {
+            this.log.info("Reconnecting to device...");
+            device.connect();
+          }
+        }, 30000);
+      });
 
-      // // Set default property to opposite
-      // if (!stateHasChanged) {
-      //   device.set({ set: !data.dps["1"] });
+      device.on("error", (error) => {
+        this.log.error(`Error! ${error}`);
+      });
+      device.on("dp-refresh", (data) => {
+        this.log.info(data);
+        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions });
+      });
 
-      //   // Otherwise we'll be stuck in an endless
-      //   // loop of toggling the state.
-      //   stateHasChanged = true;
-    });
+      device.on("data", (data) => {
+        this.log.info(data);
+        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions });
+
+        // // Set default property to opposite
+        // if (!stateHasChanged) {
+        //   device.set({ set: !data.dps["1"] });
+
+        //   // Otherwise we'll be stuck in an endless
+        //   // loop of toggling the state.
+        //   stateHasChanged = true;
+      });
+    } catch (error) {
+      this.log.error(`Error connecting to ${id}: ${error}`);
+      this.log.error(error.stack);
+    }
   }
   async updateDevices() {}
 
@@ -291,7 +294,7 @@ class Euhome extends utils.Adapter {
         const deviceId = id.split(".")[2];
         const folder = id.split(".")[3];
         const command = id.split(".")[4];
-        if (folder !== "dps" || command !== "Refresh") {
+        if (folder !== "dps" && command !== "Refresh") {
           return;
         }
         const device = this.devices[deviceId];
@@ -300,11 +303,17 @@ class Euhome extends utils.Adapter {
           return;
         }
         if (!device.isConnected()) {
-          await device.connect();
+          await device.connect().catch((error) => {
+            this.log.error(`Error! ${error}`);
+          });
         }
-        await device.set({ dps: command, set: state.val });
+        await device.set({ dps: parseInt(command), set: state.val }).catch((error) => {
+          this.log.error(`Error! ${error}`);
+        });
         this.refreshTimeout = setTimeout(() => {
-          device.refresh();
+          device.refresh().catch((error) => {
+            this.log.error(`Error! ${error}`);
+          });
         }, 5000);
       } else {
         // const idArray = id.split(".");
