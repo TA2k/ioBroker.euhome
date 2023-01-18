@@ -110,7 +110,7 @@ class Euhome extends utils.Adapter {
       },
     })
       .then((res) => {
-        this.log.debug(JSON.stringify(res.data));
+        //  this.log.debug(JSON.stringify(res.data));
         if (res.data.access_token) {
           this.log.info("Login successful");
           this.session = res.data;
@@ -233,7 +233,7 @@ class Euhome extends utils.Adapter {
       device.on("disconnected", () => {
         this.log.info("Disconnected from device. Reconnect in 30s");
         this.reconnectTimeout = setTimeout(() => {
-          if (!device.isConnected) {
+          if (!device.isConnected()) {
             this.log.info("Reconnecting to device...");
             device.connect();
           }
@@ -305,7 +305,7 @@ class Euhome extends utils.Adapter {
         if (folder !== "dps" && command !== "Refresh") {
           return;
         }
-        const device = this.devices[deviceId];
+        const device = this.tuyaDevices[deviceId];
         if (id.split(".")[4] === "Refresh") {
           this.updateDevices();
           return;
