@@ -140,12 +140,17 @@ class Euhome extends utils.Adapter {
       this.log.error("No user_id found");
       return;
     }
-    const sid = await this.tuyaCloud.loginEx({
-      email: this.config.username,
-      password: this.config.password,
-      uid: this.session.user_id,
-      returnFullLoginResponse: "false",
-    });
+    const sid = await this.tuyaCloud
+      .loginEx({
+        email: this.config.username,
+        password: this.config.password,
+        uid: this.session.user_id,
+        returnFullLoginResponse: "false",
+      })
+      .catch((error) => {
+        this.log.error(error);
+        this.log.error("Login failed");
+      });
     return sid;
   }
 
