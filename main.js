@@ -214,7 +214,15 @@ class Euhome extends utils.Adapter {
         issueRefreshOnConnect: true,
       });
       this.tuyaDevices[id] = device;
-      // Find device on network
+      device
+        .find({ timeout: 30, all: true })
+        .then((data) => {
+          this.log.info(`Found devices ${JSON.stringify(data)}`);
+        })
+        .catch((error) => {
+          this.log.error(`Error All! ${error}`);
+        });
+
       device
         .find()
         .then(() => {
