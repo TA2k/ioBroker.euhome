@@ -1,0 +1,108 @@
+{
+  "common": {
+    "name": "euhome",
+    "version": "0.0.1",
+    "news": {
+      "0.0.1": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "zh-cn": "首次出版"
+      }
+    },
+    "title": "Eufy Home Robovac",
+    "titleLang": {
+      "en": "Eufy Home Robovac",
+      "de": "Eufy Home Robovac",
+      "ru": "Юфи Хоум Робовак",
+      "pt": "Eufy Home Robovac",
+      "nl": "Eufy Home Robovac",
+      "fr": "Maison Eufy Robovac",
+      "it": "Eufy Casa Robovac",
+      "es": "Eufy Inicio Robovac",
+      "pl": "Eufy Home Robovac",
+      "zh-cn": "Eufy Home 罗博瓦克"
+    },
+    "desc": {
+      "en": "Adapter for eufy Home devices like Robovac",
+      "de": "Adapter für eufy Home Geräte wie Robovac",
+      "ru": "Адаптер для устройств eufy Home, таких как Robovac",
+      "pt": "Adaptador para dispositivos domésticos eufy como Robovac",
+      "nl": "Adapter voor eufy Home-apparaten zoals Robovac",
+      "fr": "Adaptateur pour appareils eufy Home comme Robovac",
+      "it": "Adattatore per dispositivi eufy Home come Robovac",
+      "es": "Adaptador para dispositivos eufy Home como Robovac",
+      "pl": "Adapter do urządzeń eufy Home, takich jak Robovac",
+      "zh-cn": "适用于 Robovac 等 eufy Home 设备的适配器"
+    },
+    "authors": ["TA2k <tombox2020@gmail.com>"],
+    "keywords": ["eufy", "eufy home", "robovac"],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "icon": "euhome.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/TA2k/ioBroker.euhome/main/admin/euhome.png",
+    "readme": "https://github.com/TA2k/ioBroker.euhome/blob/main/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "household",
+    "compact": true,
+    "connectionType": "cloud",
+    "dataSource": "poll",
+    "plugins": {
+      "sentry": {
+        "dsn": "https://802f699c7aa84a62b0bcb54b31485352@sentry.iobroker.net/226"
+      }
+    },
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=3.3.22"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=5.2.28"
+      }
+    ]
+  },
+  "encryptedNative": ["password"],
+  "protectedNative": ["password"],
+  "native": {
+    "username": "",
+    "password": ""
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
+}
