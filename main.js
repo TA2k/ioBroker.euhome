@@ -136,7 +136,10 @@ class Euhome extends utils.Adapter {
       region: "EU",
       ttid: "android",
     });
-
+    if (!this.session.user_id) {
+      this.log.error("No user_id found");
+      return;
+    }
     const sid = await this.tuyaCloud.loginEx({
       email: this.config.username,
       password: this.config.password,
