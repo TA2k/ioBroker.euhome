@@ -229,6 +229,7 @@ class Euhome extends utils.Adapter {
           this.log.info("Found device on network with IP: " + device.ip + "");
           device.connect().catch((error) => {
             this.log.error(`Failed to connect to device please close the app or check your network ${error}`);
+          });
         })
         .catch((error) => {
           this.log.error(`Failed to find device ${error}`);
