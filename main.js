@@ -217,7 +217,7 @@ class Euhome extends utils.Adapter {
       device
         .find({ timeout: 30, all: true })
         .then((data) => {
-          this.log.info(`Found devices ${JSON.stringify(data)}`);
+          this.log.info(`All devices in the network: ${JSON.stringify(data)}`);
         })
         .catch((error) => {
           this.log.error(`Error All! ${error}`);
@@ -226,11 +226,12 @@ class Euhome extends utils.Adapter {
       device
         .find()
         .then(() => {
-          // Connect to device
-          device.connect();
+          this.log.info("Found device on network with IP: " + device.ip + "");
+          device.connect().catch((error) => {
+            this.log.error(`Failed to connect to device please close the app or check your network ${error}`);
         })
         .catch((error) => {
-          this.log.error(`Error! ${error}`);
+          this.log.error(`Failed to find device ${error}`);
         });
 
       // Add event listeners
