@@ -228,7 +228,9 @@ class Euhome extends utils.Adapter {
         .then(() => {
           this.log.info("Found device on network with IP: " + device.ip + "");
           device.connect().catch((error) => {
-            this.log.error(`Failed to connect to device please close the app or check your network ${error}`);
+            this.log.error(
+              `Failed to connect to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`
+            );
           });
         })
         .catch((error) => {
