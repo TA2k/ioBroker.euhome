@@ -245,7 +245,9 @@ class Euhome extends utils.Adapter {
         this.reconnectTimeout = setTimeout(() => {
           if (!device.isConnected()) {
             this.log.info("Reconnecting to device...");
-            device.connect();
+            device.connect().catch((error) => {
+              this.log.error(`Error connect on disconnect ${error}`);
+            });
           }
         }, 30000);
       });
@@ -317,20 +319,26 @@ class Euhome extends utils.Adapter {
         }
         const device = this.tuyaDevices[deviceId];
         if (id.split(".")[4] === "Refresh") {
-          this.updateDevices();
+          device.refresh().catch((error) => {
+            this.log.error(`Error refresh ${error}`);
+          });
           return;
         }
         if (!device.isConnected()) {
+          if (!device.ip) {
+            this.log.error(`No IP found for ${deviceId} cannot send command`);
+            return;
+          }
           await device.connect().catch((error) => {
-            this.log.error(`Error! ${error}`);
+            this.log.error(`Error connect on sending Command ${error}`);
           });
         }
         await device.set({ dps: parseInt(command), set: state.val }).catch((error) => {
-          this.log.error(`Error! ${error}`);
+          this.log.error(`Error sending ${error}`);
         });
         this.refreshTimeout = setTimeout(() => {
           device.refresh().catch((error) => {
-            this.log.error(`Error! ${error}`);
+            this.log.error(`Error refresh ${error}`);
           });
         }, 5000);
       } else {
