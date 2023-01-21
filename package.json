@@ -25,7 +25,7 @@
     "axios": "^1.2.3",
     "got": "^11.8.6",
     "is": "^3.3.0",
-    "json2iob": "^2.0.2",
+    "json2iob": "^2.1.0",
     "node-rsa": "^1.1.1",
     "randomatic": "^3.1.1",
     "sort-keys-recursive": "^2.1.8",

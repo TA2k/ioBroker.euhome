@@ -53,6 +53,46 @@ class Euhome extends utils.Adapter {
       142: "CONSUMABLES",
       116: "CONSUMABLES",
     };
+    this.states = {
+      106: {
+        NO_ERROR: "no_error",
+        STUCK_5_MIN: "Stuck_5_min",
+        CRASH_BAR_STUCK: "Crash_bar_stuck",
+        SENSOR_DIRTY: "sensor_dirty",
+        NOT_ENOUGH_POWER: "N_enough_pow",
+        WHEEL_STUCK: "Wheel_stuck",
+        S_BRUSH_STUCK: "S_brush_stuck",
+        FAN_STUCK: "Fan_stuck",
+        R_BRUSH_STUCK: "R_brush_stuck",
+      },
+      15: {
+        RUNNING: "Running", // Cleaning
+        STAND_BY: "standby", // Not in the dock, paused
+        SLEEPING: "Sleeping", // Not in the dock - goes into this state after being paused for a while
+        CHARGING: "Charging", // In the dock, charging
+        COMPLETED: "completed", // In the dock, full charged
+        RECHARGE_NEEDED: "Recharge", // Going home because battery is depleted or home was pressed
+      },
+      102: {
+        STANDARD: "Standard",
+        BOOST_IQ: "Boost_IQ",
+        MAX: "Max",
+        NO_SUCTION: "No_suction",
+      },
+      3: {
+        FORWARD: "forward",
+        BACKWARD: "back",
+        LEFT: "left",
+        RIGHT: "right",
+      },
+      5: {
+        AUTO: "auto",
+        SMALL_ROOM: "SmallRoom",
+        SPOT: "Spot",
+        EDGE: "Edge",
+        NO_SWEEP: "Nosweep",
+      },
+    };
   }
 
   /**
@@ -198,7 +238,7 @@ class Euhome extends utils.Adapter {
             native: {},
           });
         });
-        await this.json2iob.parse(id, device, { forceIndex: true, write: true, descriptions: this.descriptions });
+        await this.json2iob.parse(id, device, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
         this.connectLocal(id, device.localKey);
       }
     }
@@ -259,12 +299,12 @@ class Euhome extends utils.Adapter {
       });
       device.on("dp-refresh", (data) => {
         this.log.info(data);
-        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions });
+        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
       });
 
       device.on("data", (data) => {
         this.log.info(data);
-        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions });
+        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
 
         // // Set default property to opposite
         // if (!stateHasChanged) {
