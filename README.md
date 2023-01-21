@@ -33,7 +33,7 @@ euhome.0.id.dps.
 
 ## Changelog
 
-### 0.0.2
+### 0.0.3
 
 - (TA2k) initial release
 
