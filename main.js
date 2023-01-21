@@ -55,42 +55,42 @@ class Euhome extends utils.Adapter {
     };
     this.states = {
       106: {
-        NO_ERROR: "no_error",
-        STUCK_5_MIN: "Stuck_5_min",
-        CRASH_BAR_STUCK: "Crash_bar_stuck",
-        SENSOR_DIRTY: "sensor_dirty",
-        NOT_ENOUGH_POWER: "N_enough_pow",
-        WHEEL_STUCK: "Wheel_stuck",
-        S_BRUSH_STUCK: "S_brush_stuck",
-        FAN_STUCK: "Fan_stuck",
-        R_BRUSH_STUCK: "R_brush_stuck",
+        no_error: "NO_ERROR",
+        Stuck_5_min: "STUCK_5_MIN",
+        Crash_bar_stuck: "CRASH_BAR_STUCK",
+        sensor_dirty: "SENSOR_DIRTY",
+        N_enough_pow: "NOT_ENOUGH_POWER",
+        Wheel_stuck: "WHEEL_STUCK",
+        S_brush_stuck: "S_BRUSH_STUCK",
+        Fan_stuck: "FAN_STUCK",
+        R_brush_stuck: "R_BRUSH_STUCK",
       },
       15: {
-        RUNNING: "Running", // Cleaning
-        STAND_BY: "standby", // Not in the dock, paused
-        SLEEPING: "Sleeping", // Not in the dock - goes into this state after being paused for a while
-        CHARGING: "Charging", // In the dock, charging
-        COMPLETED: "completed", // In the dock, full charged
-        RECHARGE_NEEDED: "Recharge", // Going home because battery is depleted or home was pressed
+        Running: "RUNNING",
+        standby: "STAND_BY",
+        Sleeping: "SLEEPING",
+        Charging: "CHARGING",
+        completed: "COMPLETED",
+        Recharge: "RECHARGE_NEEDED",
       },
       102: {
-        STANDARD: "Standard",
-        BOOST_IQ: "Boost_IQ",
-        MAX: "Max",
-        NO_SUCTION: "No_suction",
+        Standard: "STANDARD",
+        Boost_IQ: "BOOST_IQ",
+        Max: "MAX",
+        No_suction: "NO_SUCTION",
       },
       3: {
-        FORWARD: "forward",
-        BACKWARD: "back",
-        LEFT: "left",
-        RIGHT: "right",
+        forward: "FORWARD",
+        back: "BACKWARD",
+        left: "LEFT",
+        right: "RIGHT",
       },
       5: {
-        AUTO: "auto",
-        SMALL_ROOM: "SmallRoom",
-        SPOT: "Spot",
-        EDGE: "Edge",
-        NO_SWEEP: "Nosweep",
+        auto: "AUTO",
+        SmallRoom: "SMALL_ROOM",
+        Spot: "SPOT",
+        Edge: "EDGE",
+        Nosweep: "NO_SWEEP",
       },
     };
   }
@@ -238,12 +238,7 @@ class Euhome extends utils.Adapter {
             native: {},
           });
         });
-        await this.json2iob.parse(id, device, {
-          forceIndex: true,
-          write: true,
-          descriptions: this.descriptions,
-          states: this.states,
-        });
+        await this.json2iob.parse(id, device, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
         this.connectLocal(id, device.localKey);
       }
     }
@@ -274,14 +269,12 @@ class Euhome extends utils.Adapter {
           this.log.info("Found device on network with IP: " + device.ip + "");
           device.connect().catch((error) => {
             this.log.error(
-              `Failed to connect to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`,
+              `Failed to connect to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`
             );
           });
         })
         .catch((error) => {
-          this.log.error(
-            `Failed to find device ip please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`,
-          );
+          this.log.error(`Failed to find device ${error}`);
         });
 
       // Add event listeners
@@ -306,22 +299,12 @@ class Euhome extends utils.Adapter {
       });
       device.on("dp-refresh", (data) => {
         this.log.info(data);
-        this.json2iob.parse(id, data, {
-          forceIndex: true,
-          write: true,
-          descriptions: this.descriptions,
-          states: this.states,
-        });
+        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
       });
 
       device.on("data", (data) => {
         this.log.info(data);
-        this.json2iob.parse(id, data, {
-          forceIndex: true,
-          write: true,
-          descriptions: this.descriptions,
-          states: this.states,
-        });
+        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
 
         // // Set default property to opposite
         // if (!stateHasChanged) {
