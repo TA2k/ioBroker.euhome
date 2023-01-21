@@ -238,7 +238,12 @@ class Euhome extends utils.Adapter {
             native: {},
           });
         });
-        await this.json2iob.parse(id, device, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
+        await this.json2iob.parse(id, device, {
+          forceIndex: true,
+          write: true,
+          descriptions: this.descriptions,
+          states: this.states,
+        });
         this.connectLocal(id, device.localKey);
       }
     }
@@ -269,12 +274,14 @@ class Euhome extends utils.Adapter {
           this.log.info("Found device on network with IP: " + device.ip + "");
           device.connect().catch((error) => {
             this.log.error(
-              `Failed to connect to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`
+              `Failed to connect to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`,
             );
           });
         })
         .catch((error) => {
-          this.log.error(`Failed to find device ${error}`);
+          this.log.error(
+            `Failed to find device ip please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`,
+          );
         });
 
       // Add event listeners
@@ -299,12 +306,22 @@ class Euhome extends utils.Adapter {
       });
       device.on("dp-refresh", (data) => {
         this.log.info(data);
-        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
+        this.json2iob.parse(id, data, {
+          forceIndex: true,
+          write: true,
+          descriptions: this.descriptions,
+          states: this.states,
+        });
       });
 
       device.on("data", (data) => {
         this.log.info(data);
-        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
+        this.json2iob.parse(id, data, {
+          forceIndex: true,
+          write: true,
+          descriptions: this.descriptions,
+          states: this.states,
+        });
 
         // // Set default property to opposite
         // if (!stateHasChanged) {
