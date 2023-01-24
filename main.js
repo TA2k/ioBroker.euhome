@@ -72,6 +72,8 @@ class Euhome extends utils.Adapter {
         Charging: "CHARGING",
         completed: "COMPLETED",
         Recharge: "RECHARGE_NEEDED",
+        cleaning: "CLEANING",
+        goto_charge: "GOING_TO_CHARGE",
       },
       102: {
         Standard: "STANDARD",
@@ -91,6 +93,11 @@ class Euhome extends utils.Adapter {
         Spot: "SPOT",
         Edge: "EDGE",
         Nosweep: "NO_SWEEP",
+        single: "SINGLE",
+        point: "POINT",
+        standby: "STANDBY",
+        wall_follow: "WALL_FOLLOW",
+        smart: "SMART",
       },
     };
   }
@@ -223,7 +230,16 @@ class Euhome extends utils.Adapter {
           native: {},
         });
 
-        const remoteArray = [{ command: "Refresh", name: "True = Refresh" }];
+        const remoteArray = [
+          { command: "Refresh", name: "True = Refresh" },
+          {
+            command: "sendCommand",
+            name: "Send custom Commmand to Device",
+            type: "json",
+            role: "text",
+            def: '{"method":"selectRoomsClean","data":{"roomIds":[2],"cleanTimes":1}}',
+          },
+        ];
         remoteArray.forEach((remote) => {
           this.setObjectNotExists(id + ".remote." + remote.command, {
             type: "state",
@@ -238,11 +254,18 @@ class Euhome extends utils.Adapter {
             native: {},
           });
         });
-        await this.json2iob.parse(id, device, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
+        await this.json2iob.parse(id, device, {
+          forceIndex: true,
+          write: true,
+          descriptions: this.descriptions,
+          states: this.states,
+          parseBase64byIds: ["117", "125", "116", "124", "139", "142"],
+        });
         this.connectLocal(id, device.localKey);
       }
     }
   }
+  w;
 
   async connectLocal(id, localKey) {
     this.log.debug(`Connecting to ${id} with localKey ${localKey}`);
@@ -269,12 +292,14 @@ class Euhome extends utils.Adapter {
           this.log.info("Found device on network with IP: " + device.ip + "");
           device.connect().catch((error) => {
             this.log.error(
-              `Failed to connect to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`
+              `Failed to connect to device please close the app or check your network. Please allow port 6668 via TCP from the device IP .  ${error}`
             );
           });
         })
         .catch((error) => {
-          this.log.error(`Failed to find device ${error}`);
+          this.log.error(
+            `Failed to find to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`
+          );
         });
 
       // Add event listeners
@@ -356,7 +381,7 @@ class Euhome extends utils.Adapter {
         const deviceId = id.split(".")[2];
         const folder = id.split(".")[3];
         const command = id.split(".")[4];
-        if (folder !== "dps" && command !== "Refresh") {
+        if (folder !== "dps" && command !== "Refresh" && command !== "sendCommand") {
           return;
         }
         const device = this.tuyaDevices[deviceId];
@@ -373,7 +398,16 @@ class Euhome extends utils.Adapter {
           }
           await device.connect().catch((error) => {
             this.log.error(`Error connect on sending Command ${error}`);
+        if (id.split(".")[4] === "sendCommand") {
+          const stateValueParsed = JSON.parse(state.val);
+          stateValueParsed.timestamp = Date.now();
+          const sendCommand = JSON.stringify(stateValueParsed);
+          this.log.debug(sendCommand);
+          const base64Value = Buffer.from(sendCommand).toString("base64");
+          await device.set({ dps: 124, set: base64Value }).catch((error) => {
+            this.log.error(`Error sending ${error}`);
           });
+          return;
         }
         await device.set({ dps: parseInt(command), set: state.val }).catch((error) => {
           this.log.error(`Error sending ${error}`);

@@ -27,6 +27,22 @@ euhome.0.id.dps.
 
 euhome.0.id.dps.
 
+Raumreinigung
+euhome.0.id.remote.sendCommand
+damit kann man dann
+
+```
+{
+  "method": "selectRoomsClean",
+  "data": {
+    "roomIds": [
+      2
+    ],
+    "cleanTimes": 1
+  }
+}
+```
+
 ## Diskussion und Fragen
 
 <https://forum.iobroker.net/topic/62168/test-adapter-eufy-home-robovac>
