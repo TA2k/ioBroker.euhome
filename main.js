@@ -265,8 +265,6 @@ class Euhome extends utils.Adapter {
       }
     }
   }
-  w;
-
   async connectLocal(id, localKey) {
     this.log.debug(`Connecting to ${id} with localKey ${localKey}`);
     try {
@@ -292,13 +290,13 @@ class Euhome extends utils.Adapter {
           this.log.info("Found device on network with IP: " + device.ip + "");
           device.connect().catch((error) => {
             this.log.error(
-              `Failed to connect to device please close the app or check your network. Please allow port 6668 via TCP from the device IP .  ${error}`
+              `Failed to connect to device please close the app or check your network. Please allow port 6668 via TCP from the device IP .  ${error}`,
             );
           });
         })
         .catch((error) => {
           this.log.error(
-            `Failed to find to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`
+            `Failed to find to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`,
           );
         });
 
@@ -324,12 +322,22 @@ class Euhome extends utils.Adapter {
       });
       device.on("dp-refresh", (data) => {
         this.log.info(data);
-        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
+        this.json2iob.parse(id, data, {
+          forceIndex: true,
+          write: true,
+          descriptions: this.descriptions,
+          states: this.states,
+        });
       });
 
       device.on("data", (data) => {
         this.log.info(data);
-        this.json2iob.parse(id, data, { forceIndex: true, write: true, descriptions: this.descriptions, states: this.states });
+        this.json2iob.parse(id, data, {
+          forceIndex: true,
+          write: true,
+          descriptions: this.descriptions,
+          states: this.states,
+        });
 
         // // Set default property to opposite
         // if (!stateHasChanged) {
@@ -398,15 +406,22 @@ class Euhome extends utils.Adapter {
           }
           await device.connect().catch((error) => {
             this.log.error(`Error connect on sending Command ${error}`);
-        if (id.split(".")[4] === "sendCommand") {
-          const stateValueParsed = JSON.parse(state.val);
-          stateValueParsed.timestamp = Date.now();
-          const sendCommand = JSON.stringify(stateValueParsed);
-          this.log.debug(sendCommand);
-          const base64Value = Buffer.from(sendCommand).toString("base64");
-          await device.set({ dps: 124, set: base64Value }).catch((error) => {
-            this.log.error(`Error sending ${error}`);
           });
+        }
+        if (id.split(".")[4] === "sendCommand") {
+          try {
+            // @ts-ignore
+            const stateValueParsed = JSON.parse(state.val);
+            stateValueParsed.timestamp = Date.now();
+            const sendCommand = JSON.stringify(stateValueParsed);
+            this.log.debug(sendCommand);
+            const base64Value = Buffer.from(sendCommand).toString("base64");
+            await device.set({ dps: 124, set: base64Value }).catch((error) => {
+              this.log.error(`Error sending ${error}`);
+            });
+          } catch (error) {
+            this.log.error(`Error parsing ${error}`);
+          }
           return;
         }
         await device.set({ dps: parseInt(command), set: state.val }).catch((error) => {
