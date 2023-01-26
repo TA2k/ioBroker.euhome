@@ -393,6 +393,10 @@ class Euhome extends utils.Adapter {
           return;
         }
         const device = this.tuyaDevices[deviceId];
+        if (!device) {
+          this.log.error(`No device found for ${deviceId} cannot send command`);
+          return;
+        }
         if (id.split(".")[4] === "Refresh") {
           device.refresh().catch((error) => {
             this.log.error(`Error refresh ${error}`);
