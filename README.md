@@ -14,6 +14,7 @@
 ## euhome adapter for ioBroker
 
 Adapter for e-Home devices like Robovac
+
 This adapter uses Sentry.
 
 ## Login procedure
