@@ -14,6 +14,109 @@
 ## euhome adapter for ioBroker
 
 Adapter for e-Home devices like Robovac
+This adapter uses Sentry.
+
+## Login procedure
+
+
+
+Enter the e-Home mail and password.
+
+
+
+## Status
+
+
+
+euhome.0.id.dps.
+
+
+
+## Control
+
+
+
+euhome.0.id.dps.
+
+
+
+Room cleaning
+
+euhome.0.id.remote.sendCommand
+
+with this you can then
+
+
+
+```
+
+{
+
+  }, "method": { "selectRoomsClean",
+
+  "data": {
+
+    "roomIds": [
+
+      2
+
+    ],
+
+    "cleanTimes": 1
+
+  }
+
+}
+
+```
+
+
+
+Zone cleaning
+
+
+
+```
+
+{"method":"selectZonesClean","data":{"zones":[{"x0":-1130,"y0":646,"x1":-830,"y1":646,"x2":-830,"y2":346,"x3":-1130,"y3":346,"cleanTimes":1,"type":"sweep"}]}}
+
+```
+
+
+
+Spot cleaning
+
+
+
+```
+
+{"method":"goto","data":{"cleanTimes":1,"target":"spot","x":-179,"y":36}}
+
+```
+
+
+
+Map:
+
+It is theoretically possible to query the map but it is not yet possible to display the data as a map
+
+
+
+```
+
+a: tuya.m.device.media.latest
+
+et: 3
+
+v: 2.0
+
+postData: {"devId": "xxxxxxxxxxxxx", "size":500, "start":""}
+
+result: {"result":{"devId":"xxxxxxxxxxxxxxxxx","startRow":"7f3f35c7_wpl4a60873b40e7b1aa5fb_307_501","datatype":0,"dataList": ["7d7d007d7d00","7e7d027e7d027e7d007f7d027f7d027f7d00807d02807d02807d00817d02817d02","817d00827d02827d02827d00837d02837d02837d00847d02847d02847d00","857d02857d02857d00867d02867d02867d00867d00". ......
+
+```
+
+
 
 ## Loginablauf
 
@@ -70,7 +173,7 @@ https://github.com/tuya/tuya-panel-sdk/blob/1750094e41e48702c2e3d8ba0c54c5858c34
 
 https://developer.tuya.com/en/docs/app-development/gyrosweeper?id=Ka6o1iax9v0a2
 
-## Diskussion und Fragen
+## Discussions / Diskussion und Fragen
 
 <https://forum.iobroker.net/topic/62168/test-adapter-eufy-home-robovac>
 
