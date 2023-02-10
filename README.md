@@ -19,35 +19,24 @@ This adapter uses Sentry.
 
 ## Login procedure
 
-
-
 Enter the e-Home mail and password.
-
-
 
 ## Status
 
-
-
 euhome.0.id.dps.
-
-
 
 ## Control
 
-
-
 euhome.0.id.dps.
 
-
+Example:
+euhome.0.id.dps.WORK_MODE = Auto to start cleaning
 
 Room cleaning
 
 euhome.0.id.remote.sendCommand
 
 with this you can then
-
-
 
 ```
 
@@ -71,11 +60,7 @@ with this you can then
 
 ```
 
-
-
 Zone cleaning
-
-
 
 ```
 
@@ -83,11 +68,7 @@ Zone cleaning
 
 ```
 
-
-
 Spot cleaning
-
-
 
 ```
 
@@ -95,13 +76,9 @@ Spot cleaning
 
 ```
 
-
-
 Map:
 
 It is theoretically possible to query the map but it is not yet possible to display the data as a map
-
-
 
 ```
 
@@ -117,8 +94,6 @@ result: {"result":{"devId":"xxxxxxxxxxxxxxxxx","startRow":"7f3f35c7_wpl4a60873b4
 
 ```
 
-
-
 ## Loginablauf
 
 Die e-Home Mail und Passwort eingeben.
@@ -130,6 +105,8 @@ euhome.0.id.dps.
 ## Steuern
 
 euhome.0.id.dps.
+
+euhome.0.id.dps.WORK_MODE = Auto um zu starten
 
 Raumreinigung
 euhome.0.id.remote.sendCommand
