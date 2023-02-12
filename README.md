@@ -15,7 +15,8 @@
 
 Adapter for e-Home devices like Robovac
 
-This adapter uses Sentry.
+**This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0. 
+
 
 ## Login procedure
 
