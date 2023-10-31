@@ -52,6 +52,8 @@ class Euhome extends utils.Adapter {
       135: "AUTO_RETURN",
       142: "CONSUMABLES",
       116: "CONSUMABLES",
+      153: "WORK_MODE",
+      152: "WORK_MODE",
     };
     this.states = {
       106: {
@@ -98,6 +100,29 @@ class Euhome extends utils.Adapter {
         standby: "STANDBY",
         wall_follow: "WALL_FOLLOW",
         smart: "SMART",
+      },
+      152: {
+        "BBoCCAE=": "AUTO",
+        AggN: "PAUSE",
+        "AA==": "STANDBY",
+      },
+      153: {
+        "BgoAEAUyAA==": "AUTO",
+        "BgoAEAVSAA==": "POSITION",
+        CAoAEAUyAggB: "PAUSE",
+        CAoCCAEQBTIA: "ROOM",
+        CAoCCAEQBVIA: "ROOM_POSITION",
+        "CgoCCAEQBTICCAE=": "ROOM_PAUSE",
+        CAoCCAIQBTIA: "SPOT",
+        CAoCCAIQBVIA: "SPOT_POSITION",
+        "CgoCCAIQBTICCAE=": "SPOT_PAUSE",
+        "BAoAEAY=": "START_MANUAL",
+        "BBAHQgA=": "GOING_TO_CHARGE",
+        "BBADGgA=": "CHARGING",
+        "BhADGgIIAQ==": "COMPLETED",
+
+        "AA==": "STANDBY",
+        AhAB: "SLEEPING",
       },
     };
   }
