@@ -105,6 +105,7 @@ class Euhome extends utils.Adapter {
         "BBoCCAE=": "AUTO",
         AggN: "PAUSE",
         "AA==": "STANDBY",
+        "AggG":"GOING_TO_CHARGE"
       },
       153: {
         "BgoAEAUyAA==": "AUTO",
