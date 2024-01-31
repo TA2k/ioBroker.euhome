@@ -105,7 +105,7 @@ class Euhome extends utils.Adapter {
         "BBoCCAE=": "AUTO",
         AggN: "PAUSE",
         "AA==": "STANDBY",
-        "AggG":"GOING_TO_CHARGE"
+        AggG: "GOING_TO_CHARGE",
       },
       153: {
         "BgoAEAUyAA==": "AUTO",
@@ -121,10 +121,10 @@ class Euhome extends utils.Adapter {
         "BBAHQgA=": "GOING_TO_CHARGE",
         "BBADGgA=": "CHARGING",
         "BhADGgIIAQ==": "COMPLETED",
-
         "AA==": "STANDBY",
         AhAB: "SLEEPING",
       },
+      177: {},
     };
   }
 
@@ -150,13 +150,19 @@ class Euhome extends utils.Adapter {
     if (sid) {
       await this.getDeviceList();
       await this.updateDevices();
-      this.updateInterval = setInterval(async () => {
-        await this.updateDevices();
-      }, 5 * 60 * 1000);
+      this.updateInterval = setInterval(
+        async () => {
+          await this.updateDevices();
+        },
+        5 * 60 * 1000,
+      );
     }
-    this.refreshTokenInterval = setInterval(() => {
-      this.refreshToken();
-    }, 24 * 60 * 60 * 1000);
+    this.refreshTokenInterval = setInterval(
+      () => {
+        this.refreshToken();
+      },
+      24 * 60 * 60 * 1000,
+    );
   }
   async login() {
     await this.requestClient({
