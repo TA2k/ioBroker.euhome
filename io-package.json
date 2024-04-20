@@ -79,7 +79,8 @@
   "protectedNative": ["password"],
   "native": {
     "username": "",
-    "password": ""
+    "password": "",
+    "interval": 5
   },
   "objects": [],
   "instanceObjects": [

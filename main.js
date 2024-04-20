@@ -8,6 +8,7 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 const axios = require("axios").default;
+const crypto = require("crypto");
 const Json2iob = require("json2iob");
 const TuyAPI = require("tuyapi");
 const TuyaCloud = require("./lib/tuyaCloud");
@@ -157,6 +158,12 @@ class Euhome extends utils.Adapter {
         },
         5 * 60 * 1000,
       );
+      this.updateIntervalNew = this.setInterval(
+        async () => {
+          await this.updateDeviceNew();
+        },
+        this.config.interval * 60 * 1000,
+      );
     }
     this.refreshTokenInterval = setInterval(
       () => {
@@ -253,8 +260,10 @@ class Euhome extends utils.Adapter {
       },
     })
       .then(async (res) => {
-        this.log.debug(res.data);
+        this.log.debug(JSON.stringify(res.data));
         this.sessionv2 = res.data;
+        //md5 hash of userid
+        this.sessionv2.gtoken = crypto.createHash("md5").update(res.data.user_center_id).digest("hex");
       })
       .catch((error) => {
         this.log.error(error);
@@ -279,7 +288,7 @@ class Euhome extends utils.Adapter {
       },
     })
       .then(async (res) => {
-        this.log.debug(res.data);
+        this.log.debug(JSON.stringify(res.data));
         this.log.info("Found " + res.data.devices.length + " devices");
         for (const device of res.data.devices) {
           await this.extendObjectAsync(device.id, {
@@ -312,17 +321,21 @@ class Euhome extends utils.Adapter {
         "model-type": "PHONE",
         "app-name": "eufy_home",
         "x-auth-token": this.sessionv2.user_center_token,
-        gtoken: "025f57fe423dd0e5e321cf3c8a148c92",
+        gtoken: this.sessionv2.gtoken,
       },
     })
       .then(async (res) => {
-        this.log.debug(res.data);
+        this.log.debug(JSON.stringify(res.data));
         this.json2iob.parse("mqtt", res.data.data, { forceIndex: true });
       })
       .catch((error) => {
         this.log.error(error);
         error.response && this.log.error(JSON.stringify(error.response.data));
       });
+    await this.updateDeviceNew();
+  }
+
+  async updateDeviceNew() {
     let currentModel = "T2351";
     await this.requestClient({
       method: "post",
@@ -339,14 +352,14 @@ class Euhome extends utils.Adapter {
         "app-name": "eufy_home",
 
         "x-auth-token": this.sessionv2.user_center_token,
-        gtoken: "025f57fe423dd0e5e321cf3c8a148c92",
+        gtoken: this.sessionv2.gtoken,
         "content-type": "application/json; charset=UTF-8",
       },
       data: { attribute: 3 },
     })
       .then(async (res) => {
-        this.log.debug(res.data);
-        this.log.debug("Found Detailed" + res.data.data.devices.length + " devices");
+        this.log.debug(JSON.stringify(res.data));
+        this.log.debug("Found Detailed: " + res.data.data.devices.length + " devices");
         for (const deviceObject of res.data.data.devices) {
           const device = deviceObject.device;
           await this.extendObjectAsync(device.device_sn, {
@@ -357,43 +370,56 @@ class Euhome extends utils.Adapter {
             native: {},
           });
           currentModel = device.device_model;
-          this.json2iob.parse(device.device_sn, device, { forceIndex: true });
+          const base64 = [];
+          const base64ToHex = [];
+          await this.requestClient({
+            method: "post",
+            maxBodyLength: Infinity,
+            url: "https://aiot-clean-api-pr.eufylife.com/app/things/get_product_data_point",
+            headers: {
+              "user-agent": "EufyHome-Android-3.1.3-753",
+              timezone: "Europe/Berlin",
+              openudid: "ANE-LX1-b454e75844e22215",
+              language: "de",
+              country: "US",
+              "os-version": "Android",
+              "model-type": "PHONE",
+              "app-name": "eufy_home",
+              "x-auth-token": "4bfdc22cea2db4fd8611dc6ca013c161a6ca006e6db86215",
+              gtoken: this.sessionv2.gtoken,
+              "content-type": "application/json; charset=UTF-8",
+            },
+            data: { code: currentModel },
+          })
+            .then(async (res) => {
+              this.log.debug(JSON.stringify(res.data));
+              if (res.data.data && res.data.data.data_point_list) {
+                for (const dataPoint of res.data.data.data_point_list) {
+                  this.descriptions[dataPoint.dp_id] = dataPoint.code;
+                  if (dataPoint.data_type === "String") {
+                    base64.push(dataPoint.dp_id);
+                  }
+                  if (dataPoint.data_type === "Raw") {
+                    base64ToHex.push(dataPoint.dp_id);
+                  }
+                }
+              }
+            })
+
+            .catch((error) => {
+              this.log.error(error);
+              error.response && this.log.error(JSON.stringify(error.response.data));
+            });
+          this.json2iob.parse(device.device_sn, device, {
+            forceIndex: true,
+            write: true,
+            descriptions: this.descriptions,
+            states: this.states,
+            parseBase64byIds: base64,
+            parseBase64byIdsToHex: base64ToHex,
+          });
         }
       })
-      .catch((error) => {
-        this.log.error(error);
-        error.response && this.log.error(JSON.stringify(error.response.data));
-      });
-
-    //get states
-    await this.requestClient({
-      method: "post",
-      maxBodyLength: Infinity,
-      url: "https://aiot-clean-api-pr.eufylife.com/app/things/get_product_data_point",
-      headers: {
-        "user-agent": "EufyHome-Android-3.1.3-753",
-        timezone: "Europe/Berlin",
-        openudid: "ANE-LX1-b454e75844e22215",
-        language: "de",
-        country: "US",
-        "os-version": "Android",
-        "model-type": "PHONE",
-        "app-name": "eufy_home",
-        "x-auth-token": "4bfdc22cea2db4fd8611dc6ca013c161a6ca006e6db86215",
-        gtoken: "025f57fe423dd0e5e321cf3c8a148c91",
-        "content-type": "application/json; charset=UTF-8",
-      },
-      data: { code: currentModel },
-    })
-      .then(async (res) => {
-        this.log.debug(res.data);
-        if (res.data.data && res.data.data.data_point_list) {
-          for (const dataPoint of res.data.data.data_point_list) {
-            this.descriptions[dataPoint.dp_id] = dataPoint.code;
-          }
-        }
-      })
-
       .catch((error) => {
         this.log.error(error);
         error.response && this.log.error(JSON.stringify(error.response.data));
