@@ -149,6 +149,7 @@ class Euhome extends utils.Adapter {
     const sid = await this.login();
     if (sid) {
       await this.getDeviceList();
+      await this.getDeviceListNew();
       await this.updateDevices();
       this.updateInterval = setInterval(
         async () => {
@@ -231,6 +232,172 @@ class Euhome extends utils.Adapter {
         this.log.error("Login failed");
       });
     return sid;
+  }
+
+  async getDeviceListNew() {
+    // get new access token
+    await this.requestClient({
+      method: "get",
+      maxBodyLength: Infinity,
+      url: "https://api.eufylife.com/v1/user/user_center_info",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "user-agent": "EufyHome-Android-3.1.3-753",
+        timezone: "Europe/Berlin",
+        category: "Home",
+        token: this.session.access_token,
+        openudid: "d0cb96521c97deb758a64dfd4ef0962ac2241e2c",
+        clienttype: "2",
+        language: "de",
+        country: "DE",
+      },
+    })
+      .then(async (res) => {
+        this.log.debug(res.data);
+        this.sessionv2 = res.data;
+      })
+      .catch((error) => {
+        this.log.error(error);
+        error.response && this.log.error(JSON.stringify(error.response.data));
+      });
+
+    //get general device list
+    await this.requestClient({
+      method: "get",
+      maxBodyLength: Infinity,
+      url: "https://api.eufylife.com/v1/device/v2",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "user-agent": "EufyHome-Android-3.1.3-753",
+        timezone: "Europe/Berlin",
+        category: "Home",
+        token: this.session.access_token,
+        openudid: "d0cb96521c97deb758a64dfd4ef0962ac2241e2c",
+        clienttype: "2",
+        language: "de",
+        country: "DE",
+      },
+    })
+      .then(async (res) => {
+        this.log.debug(res.data);
+        this.log.info("Found " + res.data.devices.length + " devices");
+        for (const device of res.data.devices) {
+          await this.extendObjectAsync(device.id, {
+            type: "device",
+            common: {
+              name: device.alias_name,
+            },
+            native: {},
+          });
+          this.json2iob.parse(device.id, device, { forceIndex: true });
+        }
+      })
+      .catch((error) => {
+        this.log.error(error);
+        error.response && this.log.error(JSON.stringify(error.response.data));
+      });
+    // get mqtt infos
+    await this.requestClient({
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://aiot-clean-api-pr.eufylife.com/app/devicemanage/get_user_mqtt_info",
+      headers: {
+        "content-type": "application/json",
+        "user-agent": "EufyHome-Android-3.1.3-753",
+        timezone: "Europe/Berlin",
+        openudid: "d0cb96521c97deb758a64dfd4ef0962ac2241e2c",
+        language: "de",
+        country: "US",
+        "os-version": "Android",
+        "model-type": "PHONE",
+        "app-name": "eufy_home",
+        "x-auth-token": this.sessionv2.user_center_token,
+        gtoken: "025f57fe423dd0e5e321cf3c8a148c92",
+      },
+    })
+      .then(async (res) => {
+        this.log.debug(res.data);
+        this.json2iob.parse("mqtt", res.data.data, { forceIndex: true });
+      })
+      .catch((error) => {
+        this.log.error(error);
+        error.response && this.log.error(JSON.stringify(error.response.data));
+      });
+    let currentModel = "T2351";
+    await this.requestClient({
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://aiot-clean-api-pr.eufylife.com/app/devicerelation/get_device_list",
+      headers: {
+        "user-agent": "EufyHome-Android-3.1.3-753",
+        timezone: "Europe/Berlin",
+        openudid: "d0cb96521c97deb758a64dfd4ef0962ac2241e2c",
+        language: "de",
+        country: "US",
+        "os-version": "Android",
+        "model-type": "PHONE",
+        "app-name": "eufy_home",
+
+        "x-auth-token": this.sessionv2.user_center_token,
+        gtoken: "025f57fe423dd0e5e321cf3c8a148c92",
+        "content-type": "application/json; charset=UTF-8",
+      },
+      data: { attribute: 3 },
+    })
+      .then(async (res) => {
+        this.log.debug(res.data);
+        this.log.debug("Found Detailed" + res.data.data.devices.length + " devices");
+        for (const deviceObject of res.data.data.devices) {
+          const device = deviceObject.device;
+          await this.extendObjectAsync(device.device_sn, {
+            type: "device",
+            common: {
+              name: device.device_name,
+            },
+            native: {},
+          });
+          currentModel = device.device_model;
+          this.json2iob.parse(device.device_sn, device, { forceIndex: true });
+        }
+      })
+      .catch((error) => {
+        this.log.error(error);
+        error.response && this.log.error(JSON.stringify(error.response.data));
+      });
+
+    //get states
+    await this.requestClient({
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://aiot-clean-api-pr.eufylife.com/app/things/get_product_data_point",
+      headers: {
+        "user-agent": "EufyHome-Android-3.1.3-753",
+        timezone: "Europe/Berlin",
+        openudid: "ANE-LX1-b454e75844e22215",
+        language: "de",
+        country: "US",
+        "os-version": "Android",
+        "model-type": "PHONE",
+        "app-name": "eufy_home",
+        "x-auth-token": "4bfdc22cea2db4fd8611dc6ca013c161a6ca006e6db86215",
+        gtoken: "025f57fe423dd0e5e321cf3c8a148c91",
+        "content-type": "application/json; charset=UTF-8",
+      },
+      data: { code: currentModel },
+    })
+      .then(async (res) => {
+        this.log.debug(res.data);
+        if (res.data.data && res.data.data.data_point_list) {
+          for (const dataPoint of res.data.data.data_point_list) {
+            this.descriptions[dataPoint.dp_id] = dataPoint.code;
+          }
+        }
+      })
+
+      .catch((error) => {
+        this.log.error(error);
+        error.response && this.log.error(JSON.stringify(error.response.data));
+      });
   }
 
   async getDeviceList() {
