@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "euhome",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "news": {
+      "0.1.0": {
+        "en": "added new device support",
+        "de": "neue Geräteunterstützung hinzugefügt",
+        "ru": "добавленная поддержка нового устройства",
+        "pt": "suporte novo dispositivo adicionado",
+        "nl": "nieuwe apparaatondersteuning toegevoegd",
+        "fr": "nouveau support de périphérique ajouté",
+        "it": "aggiunto nuovo supporto dispositivo",
+        "es": "nuevo soporte de dispositivo",
+        "pl": "dodane nowe wsparcie urządzenia",
+        "uk": "додано нову підтримку пристроїв",
+        "zh-cn": "添加新设备支持"
+      },
       "0.0.3": {
         "en": "initial release",
         "de": "Erstveröffentlichung",

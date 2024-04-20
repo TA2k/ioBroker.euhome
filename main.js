@@ -400,7 +400,7 @@ class Euhome extends utils.Adapter {
                     base64.push(dataPoint.dp_id);
                   }
                   if (dataPoint.data_type === "Raw") {
-                    base64ToHex.push(dataPoint.dp_id);
+                    base64ToHex.push(dataPoint.dp_id.toString());
                   }
                 }
               }

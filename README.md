@@ -15,8 +15,7 @@
 
 Adapter for e-Home devices like Robovac
 
-**This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0. 
-
+**This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0.
 
 ## Login procedure
 
@@ -157,6 +156,9 @@ https://developer.tuya.com/en/docs/app-development/gyrosweeper?id=Ka6o1iax9v0a2
 <https://forum.iobroker.net/topic/62168/test-adapter-eufy-home-robovac>
 
 ## Changelog
+### 0.1.0 (2024-04-20)
+
+- added new device support
 
 ### 0.0.3
 
@@ -166,7 +168,7 @@ https://developer.tuya.com/en/docs/app-development/gyrosweeper?id=Ka6o1iax9v0a2
 
 MIT License
 
-Copyright (c) 2023 TA2k <tombox2020@gmail.com>
+Copyright (c) 2023-2030 TA2k <tombox2020@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
