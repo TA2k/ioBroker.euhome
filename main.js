@@ -736,7 +736,7 @@ class Euhome extends utils.Adapter {
     "timestamp": 1713685578884,
     "version": "1.0.0.1"
   },
-  "payload": "{\\"account_id\\":\\"0641\\",\\"data\\":{\\"152\\":\\"AggN\\"},\\"device_sn\\":\\"AMP96Y0E05400164\\",\\"protocol\\":2,\\"t\\":1713685578885}"
+  "payload": "{\\"account_id\\":\\"0641\\",\\"data\\":{\\"152\\":\\"AggN\\"},\\"device_sn\\":\\"AMP\\",\\"protocol\\":2,\\"t\\":1713685578885}"
 }
 
 */
