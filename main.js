@@ -8,6 +8,7 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 const axios = require("axios").default;
+const mqtt = require("mqtt");
 const crypto = require("crypto");
 const Json2iob = require("json2iob");
 const TuyAPI = require("tuyapi");
@@ -33,8 +34,11 @@ class Euhome extends utils.Adapter {
     this.reLoginTimeout = null;
     this.refreshTokenTimeout = null;
     this.session = {};
+    this.mqttClient = null;
     this.json2iob = new Json2iob(this);
     this.requestClient = axios.create();
+    this.mqttCredentials = null;
+    this.dataPoints = {};
     this.descriptions = {
       1: "POWER",
       2: "PLAY_PAUSE",
@@ -151,6 +155,11 @@ class Euhome extends utils.Adapter {
     if (sid) {
       await this.getDeviceList();
       await this.getDeviceListNew();
+      if (this.mqttCredentials) {
+        this.log.info("MQTT Credentials found");
+        this.log.info("Start MQTT Connection");
+        this.connectMqtt();
+      }
       await this.updateDevices();
       this.updateInterval = setInterval(
         async () => {
@@ -334,7 +343,91 @@ class Euhome extends utils.Adapter {
       });
     await this.updateDeviceNew();
   }
+  async connectMqtt() {
+    if (this.mqttClient) {
+      this.mqttClient.end();
+    }
+    this.mqttClient = mqtt.connect("mqtt://" + this.mqttCredentials.endpoint_addr, {
+      clientId: `android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${this.mqttCredentials.user_id}-${Date.now()}`,
+      username: this.mqttCredentials.thing_name,
+      cert: Buffer.from(this.mqttCredentials.certificate_pem, "utf8"),
+      key: Buffer.from(this.mqttCredentials.private_key, "utf8"),
+    });
 
+    this.mqttClient.on("connect", () => {
+      this.log.info("Connected to MQTT");
+      for (const device of this.deviceArray) {
+        this.log.debug(`Subscribe to cmd/eufy_home/${device.model}/${device.id}/res`);
+        this.mqttClient && this.mqttClient.subscribe(`cmd/eufy_home/${device.model}/${device.id}/res`);
+      }
+    });
+    this.mqttClient.on("message", (topic, message) => {
+      /* Example response
+      {
+  "head": {
+    "version": "1.0.0.1",
+    "client_id": "XXXXXX",
+    "sess_id": "1368-7091",
+    "msg_seq": 1104,
+    "cmd": 65537,
+    "cmd_status": 1,
+    "sign_code": 0,
+    "seed": "null",
+    "timestamp": 1713685571
+  },
+  "payload": {
+    "protocol": 1,
+    "t": 1713685571042,
+    "account_id": "XXXXXX",
+    "device_sn": "XXXXXXX",
+    "data": { "168": "JQojCgIIAxICCAMaAggDIgIIAyoCCAMyAggCoAHgu76zqP6O5Bc=" }
+  }
+}
+*/
+      this.log.debug(`Received message on ${topic}: ${message.toString()}`);
+      const messageParsed = JSON.parse(message.toString());
+      const device = this.devices[messageParsed.payload.device_sn];
+      if (!device) {
+        this.log.error(`Device not found for ${messageParsed.payload.device_sn}`);
+        return;
+      }
+      const data = messageParsed.payload.data;
+      if (this.dataPoints[device.model]) {
+        for (const dataPoint of this.dataPoints[device.model]) {
+          if (dataPoint.data_type === "Raw" && data[dataPoint.dp_id]) {
+            this.setStateAsync(
+              device.id + ".dps." + dataPoint.dp_id,
+              Buffer.from(data[dataPoint.dp_id], "base64").toString("hex"),
+              true,
+            );
+          } else if (dataPoint.data_type === "String" && data[dataPoint.dp_id]) {
+            this.setStateAsync(
+              device.id + ".dps." + dataPoint.dp_id,
+              Buffer.from(data[dataPoint.dp_id], "base64").toString("utf8"),
+              true,
+            );
+          } else {
+            this.setStateAsync(device.id + ".dps." + dataPoint.dp_id, data[dataPoint.dp_id], true);
+          }
+        }
+      }
+    });
+    this.mqttClient.on("error", (error) => {
+      this.log.error(`MQTT Error: ${error}`);
+    });
+    this.mqttClient.on("close", () => {
+      this.log.error("MQTT Connection closed");
+    });
+    this.mqttClient.on("reconnect", () => {
+      this.log.info("MQTT Reconnect");
+    });
+    this.mqttClient.on("offline", () => {
+      this.log.error("MQTT Offline");
+    });
+    this.mqttClient.on("end", () => {
+      this.log.info("MQTT End");
+    });
+  }
   async updateDeviceNew() {
     let currentModel = "T2351";
     await this.requestClient({
@@ -394,6 +487,7 @@ class Euhome extends utils.Adapter {
             .then(async (res) => {
               this.log.debug(JSON.stringify(res.data));
               if (res.data.data && res.data.data.data_point_list) {
+                this.dataPoints[currentModel] = res.data.data.data_point_list;
                 for (const dataPoint of res.data.data.data_point_list) {
                   this.descriptions[dataPoint.dp_id] = dataPoint.code;
                   if (dataPoint.data_type === "String") {
@@ -615,6 +709,57 @@ class Euhome extends utils.Adapter {
         const folder = id.split(".")[3];
         const command = id.split(".")[4];
         if (folder !== "dps" && command !== "Refresh" && command !== "sendCommand") {
+          return;
+        }
+        if (this.mqttClient) {
+          this.log.info(`Send command to mqtt ${deviceId} ${command} ${state.val}`);
+          /* example
+          {
+  "head": {
+    "client_id": "android-eufy_home-06316ee844007eda1d47de15872ace5b9b3ba6c0-eufy_android_ANE-LX1_06316ee844007eda1d47de15872ace5b9b3ba6c0",
+    "cmd": 65537,
+    "cmd_status": 2,
+    "msg_seq": 1,
+    "seed": "",
+    "sess_id": "android-eufy_home-06316ee844007eda1d47de15872ace5b9b3ba6c0-eufy_android_ANE-LX1_06316ee844007eda1d47de15872ace5b9b3ba6c0",
+    "sign_code": 0,
+    "timestamp": 1713685578884,
+    "version": "1.0.0.1"
+  },
+  "payload": "{\\"account_id\\":\\"06316ee844007eda1d47de15872ace5b9b3ba6c0\\",\\"data\\":{\\"152\\":\\"AggN\\"},\\"device_sn\\":\\"AMP96Y0E05400164\\",\\"protocol\\":2,\\"t\\":1713685578885}"
+}
+
+*/
+          const dataPayload = {};
+          dataPayload[command] = state.val;
+          const payload = {
+            account_id: this.sessionv2.user_center_id,
+            data: dataPayload,
+            device_sn: deviceId,
+            protocol: 2,
+            t: Date.now(),
+          };
+          const value = {
+            head: {
+              client_id: `android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${this.mqttCredentials.user_id}`,
+              cmd: 65537,
+              cmd_status: 2,
+              msg_seq: 1,
+              seed: "",
+              sess_id: `android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${this.mqttCredentials.user_id}`,
+              sign_code: 0,
+              timestamp: Date.now(),
+              version: "1.0.0.1",
+            },
+            payload: JSON.stringify(payload),
+          };
+          this.log.debug(
+            `Send ${JSON.stringify(value)} to cmd/eufy_home/${this.devices[deviceId].model}/${deviceId}/req`,
+          );
+          this.mqttClient.publish(
+            `cmd/eufy_home/${this.devices[deviceId].model}/${deviceId}/req`,
+            JSON.stringify(value),
+          );
           return;
         }
         const device = this.tuyaDevices[deviceId];
