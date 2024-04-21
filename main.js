@@ -171,7 +171,7 @@ class Euhome extends utils.Adapter {
         async () => {
           await this.updateDeviceNew();
         },
-        this.config.interval * 60 * 1000,
+        5 * 60 * 1000,
       );
     }
     this.refreshTokenInterval = setInterval(
@@ -335,6 +335,7 @@ class Euhome extends utils.Adapter {
     })
       .then(async (res) => {
         this.log.debug(JSON.stringify(res.data));
+        this.mqttCredentials = res.data.data;
         this.json2iob.parse("mqtt", res.data.data, { forceIndex: true });
       })
       .catch((error) => {
@@ -347,8 +348,15 @@ class Euhome extends utils.Adapter {
     if (this.mqttClient) {
       this.mqttClient.end();
     }
+    this.log.debug(
+      `clientid: android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${
+        this.mqttCredentials.user_id
+      }-${Date.now()}`,
+    );
     this.mqttClient = mqtt.connect("mqtt://" + this.mqttCredentials.endpoint_addr, {
-      clientId: `android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${this.mqttCredentials.user_id}-${Date.now()}`,
+      clientId: `android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${
+        this.mqttCredentials.user_id
+      }-${Date.now()}`,
       username: this.mqttCredentials.thing_name,
       cert: Buffer.from(this.mqttCredentials.certificate_pem, "utf8"),
       key: Buffer.from(this.mqttCredentials.private_key, "utf8"),
@@ -386,28 +394,27 @@ class Euhome extends utils.Adapter {
 */
       this.log.debug(`Received message on ${topic}: ${message.toString()}`);
       const messageParsed = JSON.parse(message.toString());
-      const device = this.devices[messageParsed.payload.device_sn];
+      const device = this.deviceArray.find((device) => device.id === messageParsed.payload.device_sn);
       if (!device) {
         this.log.error(`Device not found for ${messageParsed.payload.device_sn}`);
         return;
       }
       const data = messageParsed.payload.data;
       if (this.dataPoints[device.model]) {
-        for (const dataPoint of this.dataPoints[device.model]) {
-          if (dataPoint.data_type === "Raw" && data[dataPoint.dp_id]) {
-            this.setStateAsync(
-              device.id + ".dps." + dataPoint.dp_id,
-              Buffer.from(data[dataPoint.dp_id], "base64").toString("hex"),
-              true,
-            );
-          } else if (dataPoint.data_type === "String" && data[dataPoint.dp_id]) {
-            this.setStateAsync(
-              device.id + ".dps." + dataPoint.dp_id,
-              Buffer.from(data[dataPoint.dp_id], "base64").toString("utf8"),
-              true,
-            );
+        for (const dataPoint of Object.keys(data)) {
+          const dataPointFound = this.dataPoints[device.model].find((dp) => dp.dp_id === parseInt(dataPoint));
+          if (dataPointFound) {
+            let value = data[dataPoint];
+            if (dataPointFound.data_type === "String") {
+              value = Buffer.from(data[dataPoint], "base64").toString("utf8");
+            }
+            if (dataPointFound.data_type === "Raw") {
+              value = Buffer.from(data[dataPoint], "base64").toString("hex");
+            }
+            this.log.debug(`Found ${dataPointFound.code} with value ${value}`);
+            this.setState(device.id + "." + dataPoint, value, true);
           } else {
-            this.setStateAsync(device.id + ".dps." + dataPoint.dp_id, data[dataPoint.dp_id], true);
+            this.setState(device.id + "." + dataPoint, data[dataPoint], true);
           }
         }
       }
@@ -453,7 +460,10 @@ class Euhome extends utils.Adapter {
       .then(async (res) => {
         this.log.debug(JSON.stringify(res.data));
         this.log.debug("Found Detailed: " + res.data.data.devices.length + " devices");
+
+        this.deviceArray = [];
         for (const deviceObject of res.data.data.devices) {
+          this.deviceArray.push({ id: deviceObject.device.device_sn, model: deviceObject.device.device_model });
           const device = deviceObject.device;
           await this.extendObjectAsync(device.device_sn, {
             type: "device",
@@ -753,13 +763,9 @@ class Euhome extends utils.Adapter {
             },
             payload: JSON.stringify(payload),
           };
-          this.log.debug(
-            `Send ${JSON.stringify(value)} to cmd/eufy_home/${this.devices[deviceId].model}/${deviceId}/req`,
-          );
-          this.mqttClient.publish(
-            `cmd/eufy_home/${this.devices[deviceId].model}/${deviceId}/req`,
-            JSON.stringify(value),
-          );
+          const device = this.deviceArray.find((device) => device.id === deviceId);
+          this.log.debug(`Send ${JSON.stringify(value)} to cmd/eufy_home/${device.model}/${deviceId}/req`);
+          this.mqttClient.publish(`cmd/eufy_home/${device.model}/${deviceId}/req`, JSON.stringify(value));
           return;
         }
         const device = this.tuyaDevices[deviceId];

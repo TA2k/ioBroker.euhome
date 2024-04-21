@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "euhome",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "news": {
+      "0.1.1": {
+        "en": "add mqtt support for new devices",
+        "de": "MQTT unterstützung für neue geräte hinzugefügt",
+        "ru": "добавить поддержку mqtt для новых устройств",
+        "pt": "adicionar suporte mqtt para novos dispositivos",
+        "nl": "mqtt-ondersteuning voor nieuwe apparaten toevoegen",
+        "fr": "ajouter le support mqtt pour les nouveaux appareils",
+        "it": "aggiungere supporto mqtt per nuovi dispositivi",
+        "es": "añadir soporte mqtt para nuevos dispositivos",
+        "pl": "dodaj obsługę mqtt dla nowych urządzeń",
+        "uk": "додати підтримку mqtt для нових пристроїв",
+        "zh-cn": "为新设备添加 mqtt 支持"
+      },
       "0.1.0": {
         "en": "added new device support",
         "de": "neue Geräteunterstützung hinzugefügt",
@@ -92,8 +105,7 @@
   "protectedNative": ["password"],
   "native": {
     "username": "",
-    "password": "",
-    "interval": 5
+    "password": ""
   },
   "objects": [],
   "instanceObjects": [
