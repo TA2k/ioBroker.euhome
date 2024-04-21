@@ -412,9 +412,9 @@ class Euhome extends utils.Adapter {
               value = Buffer.from(data[dataPoint], "base64").toString("hex");
             }
             this.log.debug(`Found ${dataPointFound.code} with value ${value}`);
-            this.setState(device.id + "." + dataPoint, value, true);
+            this.setState(device.id + ".dps." + dataPoint, value, true);
           } else {
-            this.setState(device.id + "." + dataPoint, data[dataPoint], true);
+            this.setState(device.id + ".dps." + dataPoint, data[dataPoint], true);
           }
         }
       }
@@ -741,7 +741,21 @@ class Euhome extends utils.Adapter {
 
 */
           const dataPayload = {};
+
+          const device = this.deviceArray.find((device) => device.id === deviceId);
           dataPayload[command] = state.val;
+          if (this.dataPoints[device.model]) {
+            const dataPointFound = this.dataPoints[device.model].find((dp) => dp.dp_id === command);
+            if (dataPointFound && state.val != null) {
+              if (dataPointFound.data_type === "String") {
+                dataPayload[command] = Buffer.from(state.val.toString()).toString("base64");
+              }
+              if (dataPointFound.data_type === "Raw") {
+                dataPayload[command] = Buffer.from(state.val.toString(), "hex").toString("base64");
+              }
+            }
+          }
+
           const payload = {
             account_id: this.sessionv2.user_center_id,
             data: dataPayload,
@@ -763,7 +777,6 @@ class Euhome extends utils.Adapter {
             },
             payload: JSON.stringify(payload),
           };
-          const device = this.deviceArray.find((device) => device.id === deviceId);
           this.log.debug(`Send ${JSON.stringify(value)} to cmd/eufy_home/${device.model}/${deviceId}/req`);
           this.mqttClient.publish(`cmd/eufy_home/${device.model}/${deviceId}/req`, JSON.stringify(value));
           return;

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "euhome",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "news": {
+      "0.1.2": {
+        "en": "correct state path",
+        "de": "State Pfad korrigiert",
+        "ru": "правильный путь состояния",
+        "pt": "caminho do estado correto",
+        "nl": "correct statuspad",
+        "fr": "chemin d'état correct",
+        "it": "percorso di stato corretto",
+        "es": "camino correcto del estado",
+        "pl": "poprawna ścieżka stanu",
+        "uk": "правильний стан шляху",
+        "zh-cn": "正确的状态路径"
+      },
       "0.1.1": {
         "en": "add mqtt support for new devices",
         "de": "MQTT unterstützung für neue geräte hinzugefügt",

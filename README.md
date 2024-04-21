@@ -156,6 +156,10 @@ https://developer.tuya.com/en/docs/app-development/gyrosweeper?id=Ka6o1iax9v0a2
 <https://forum.iobroker.net/topic/62168/test-adapter-eufy-home-robovac>
 
 ## Changelog
+### 0.1.2 (2024-04-21)
+
+- correct state path
+
 ### 0.1.1 (2024-04-21)
 
 - add mqtt support for new devices

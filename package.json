@@ -1,6 +1,6 @@
 {
   "name": "iobroker.euhome",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Adapter for eufy Home devices like Robovac",
   "author": {
     "name": "TA2k",
