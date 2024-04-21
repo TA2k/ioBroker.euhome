@@ -726,17 +726,17 @@ class Euhome extends utils.Adapter {
           /* example
           {
   "head": {
-    "client_id": "android-eufy_home-06316ee844007eda1d47de15872ace5b9b3ba6c0-eufy_android_ANE-LX1_06316ee844007eda1d47de15872ace5b9b3ba6c0",
+    "client_id": "android-eufy_home-0641-eufy_android_ANE-LX1_0641",
     "cmd": 65537,
     "cmd_status": 2,
     "msg_seq": 1,
     "seed": "",
-    "sess_id": "android-eufy_home-06316ee844007eda1d47de15872ace5b9b3ba6c0-eufy_android_ANE-LX1_06316ee844007eda1d47de15872ace5b9b3ba6c0",
+    "sess_id": "android-eufy_home-0641-eufy_android_ANE-LX1_0641",
     "sign_code": 0,
     "timestamp": 1713685578884,
     "version": "1.0.0.1"
   },
-  "payload": "{\\"account_id\\":\\"06316ee844007eda1d47de15872ace5b9b3ba6c0\\",\\"data\\":{\\"152\\":\\"AggN\\"},\\"device_sn\\":\\"AMP96Y0E05400164\\",\\"protocol\\":2,\\"t\\":1713685578885}"
+  "payload": "{\\"account_id\\":\\"0641\\",\\"data\\":{\\"152\\":\\"AggN\\"},\\"device_sn\\":\\"AMP96Y0E05400164\\",\\"protocol\\":2,\\"t\\":1713685578885}"
 }
 
 */
