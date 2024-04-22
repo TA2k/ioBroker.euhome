@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "euhome",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "news": {
+      "0.1.4": {
+        "en": "fix dps states",
+        "de": "DPS States korrigiert",
+        "ru": "исправить состояния dps",
+        "pt": "corrigir estados de dps",
+        "nl": "dps-toestanden herstellen",
+        "fr": "fixer les états dps",
+        "it": "correggere gli stati dps",
+        "es": "arregla los estados",
+        "pl": "fix dps states",
+        "uk": "фіксувати стани dps",
+        "zh-cn": "修补 dps 状态"
+      },
       "0.1.3": {
         "en": "correct state path",
         "de": "State Pfad korrigiert",
