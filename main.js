@@ -369,7 +369,7 @@ class Euhome extends utils.Adapter {
     })
       .then(async (res) => {
         this.log.debug(JSON.stringify(res.data));
-        this.log.info("Found " + res.data.devices.length + " devices");
+        this.log.info("Found " + res.data.devices.length + " devices via MQTT");
         for (const device of res.data.devices) {
           await this.extendObjectAsync(device.id, {
             type: "device",
@@ -606,7 +606,7 @@ class Euhome extends utils.Adapter {
     for (const group of groups) {
       this.log.debug(`Group: ${group.name} (${group.groupId})`);
       const devicesArr = await this.tuyaCloud.request({ action: "tuya.m.my.group.device.list", gid: group.groupId });
-      this.log.info(`Found ${devicesArr.length} devices`);
+      this.log.info(`Found ${devicesArr.length} devices via Tuya Cloud`);
       for (const device of devicesArr) {
         this.log.info(`Device: ${device.name} (${device.devId})`);
         const id = device.devId;
@@ -814,6 +814,10 @@ class Euhome extends utils.Adapter {
           const dataPayload = {};
 
           const device = this.deviceArray.find((device) => device.id === deviceId);
+          if (!device) {
+            this.log.error(`No device found for ${deviceId} cannot send command`);
+            return;
+          }
           dataPayload[command] = state.val;
           if (this.dataPoints[device.model]) {
             const dataPointFound = this.dataPoints[device.model].find((dp) => dp.dp_id === command);
