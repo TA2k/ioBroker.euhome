@@ -156,6 +156,7 @@ https://developer.tuya.com/en/docs/app-development/gyrosweeper?id=Ka6o1iax9v0a2
 <https://forum.iobroker.net/topic/62168/test-adapter-eufy-home-robovac>
 
 ## Changelog
+
 ### 0.1.4 (2024-04-22)
 
 - fix dps states
