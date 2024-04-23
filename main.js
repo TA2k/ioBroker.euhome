@@ -39,6 +39,8 @@ class Euhome extends utils.Adapter {
     this.requestClient = axios.create();
     this.mqttCredentials = null;
     this.dataPoints = {};
+    //random 10 hex string
+    this.openudid = crypto.randomBytes(16).toString('hex');
     this.descriptions = {
       1: 'POWER',
       2: 'PLAY_PAUSE',
@@ -259,7 +261,7 @@ class Euhome extends utils.Adapter {
       headers: {
         category: 'Home',
         Accept: '*/*',
-        openudid: 'd0cb96521c97deb758a64dfd4ef0962ac2241e2c',
+        openudid: this.openudid,
         'Accept-Language': 'de-DE;q=1, uk-DE;q=0.9, en-DE;q=0.8',
         'Content-Type': 'application/json',
         clientType: '1',
@@ -333,7 +335,7 @@ class Euhome extends utils.Adapter {
         timezone: 'Europe/Berlin',
         category: 'Home',
         token: this.session.access_token,
-        openudid: 'd0cb96521c97deb758a64dfd4ef0962ac2241e2c',
+        openudid: this.openudid,
         clienttype: '2',
         language: 'de',
         country: 'DE',
@@ -350,6 +352,7 @@ class Euhome extends utils.Adapter {
         this.sessionv2.gtoken = crypto.createHash('md5').update(res.data.user_center_id).digest('hex');
       })
       .catch((error) => {
+        this.log.error('get user center info failed');
         this.log.error(error);
         error.response && this.log.error(JSON.stringify(error.response.data));
       });
@@ -365,7 +368,7 @@ class Euhome extends utils.Adapter {
         timezone: 'Europe/Berlin',
         category: 'Home',
         token: this.session.access_token,
-        openudid: 'd0cb96521c97deb758a64dfd4ef0962ac2241e2c',
+        openudid: this.openudid,
         clienttype: '2',
         language: 'de',
         country: 'DE',
@@ -386,6 +389,7 @@ class Euhome extends utils.Adapter {
         }
       })
       .catch((error) => {
+        this.log.error('get device list failed');
         this.log.error(error);
         error.response && this.log.error(JSON.stringify(error.response.data));
       });
@@ -398,7 +402,7 @@ class Euhome extends utils.Adapter {
         'content-type': 'application/json',
         'user-agent': 'EufyHome-Android-3.1.3-753',
         timezone: 'Europe/Berlin',
-        openudid: 'd0cb96521c97deb758a64dfd4ef0962ac2241e2c',
+        openudid: this.openudid,
         language: 'de',
         country: 'US',
         'os-version': 'Android',
@@ -414,6 +418,7 @@ class Euhome extends utils.Adapter {
         this.json2iob.parse('mqtt', res.data.data, { forceIndex: true });
       })
       .catch((error) => {
+        this.log.error('get mqtt failed');
         this.log.error(error);
         error.response && this.log.error(JSON.stringify(error.response.data));
       });
@@ -519,7 +524,7 @@ class Euhome extends utils.Adapter {
       headers: {
         'user-agent': 'EufyHome-Android-3.1.3-753',
         timezone: 'Europe/Berlin',
-        openudid: 'd0cb96521c97deb758a64dfd4ef0962ac2241e2c',
+        openudid: this.openudid,
         language: 'de',
         country: 'US',
         'os-version': 'Android',
@@ -557,13 +562,13 @@ class Euhome extends utils.Adapter {
             headers: {
               'user-agent': 'EufyHome-Android-3.1.3-753',
               timezone: 'Europe/Berlin',
-              openudid: 'ANE-LX1-b454e75844e22215',
+              openudid: this.openudid,
               language: 'de',
               country: 'US',
               'os-version': 'Android',
               'model-type': 'PHONE',
               'app-name': 'eufy_home',
-              'x-auth-token': '4bfdc22cea2db4fd8611dc6ca013c161a6ca006e6db86215',
+              'x-auth-token': this.sessionv2.user_center_token,
               gtoken: this.sessionv2.gtoken,
               'content-type': 'application/json; charset=UTF-8',
             },
@@ -586,6 +591,7 @@ class Euhome extends utils.Adapter {
             })
 
             .catch((error) => {
+              this.log.error('get product data point failed');
               this.log.error(error);
               error.response && this.log.error(JSON.stringify(error.response.data));
             });
@@ -600,6 +606,7 @@ class Euhome extends utils.Adapter {
         }
       })
       .catch((error) => {
+        this.log.error('update device failed');
         this.log.error(error);
         error.response && this.log.error(JSON.stringify(error.response.data));
       });

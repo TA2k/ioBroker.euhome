@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "euhome",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "news": {
+      "0.1.5": {
+        "en": "fix login for new devices",
+        "de": "fix login für neue Geräte",
+        "ru": "для новых устройств",
+        "pt": "corrigir login para novos dispositivos",
+        "nl": "fix login voor nieuwe apparaten",
+        "fr": "fixer la connexion pour les nouveaux appareils",
+        "it": "fix login per nuovi dispositivi",
+        "es": "fijar login para nuevos dispositivos",
+        "pl": "naprawić logowanie dla nowych urządzeń",
+        "uk": "фіксувати логін для нових пристроїв",
+        "zh-cn": "固定新设备的登录"
+      },
       "0.1.4": {
         "en": "fix dps states",
         "de": "DPS States korrigiert",
