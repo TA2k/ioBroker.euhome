@@ -429,12 +429,12 @@ class Euhome extends utils.Adapter {
       this.mqttClient.end();
     }
     this.log.debug(
-      `clientid: android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${
+      `clientid: android-${this.mqttCredentials.app_name}-eufy_android_${this.openudid}_${
         this.mqttCredentials.user_id
       }-${Date.now()}`,
     );
     this.mqttClient = mqtt.connect('mqtt://' + this.mqttCredentials.endpoint_addr, {
-      clientId: `android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${
+      clientId: `android-${this.mqttCredentials.app_name}-eufy_android_${this.openudid}_${
         this.mqttCredentials.user_id
       }-${Date.now()}`,
       username: this.mqttCredentials.thing_name,
@@ -851,12 +851,12 @@ class Euhome extends utils.Adapter {
           };
           const value = {
             head: {
-              client_id: `android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${this.mqttCredentials.user_id}`,
+              client_id: `android-${this.mqttCredentials.app_name}-eufy_android_${this.openudid}_${this.mqttCredentials.user_id}`,
               cmd: 65537,
               cmd_status: 2,
               msg_seq: 1,
               seed: '',
-              sess_id: `android-${this.mqttCredentials.app_name}-eufy_android_d0cb96521c97deb758a64dfd4ef0962ac2241e2c_${this.mqttCredentials.user_id}`,
+              sess_id: `android-${this.mqttCredentials.app_name}-eufy_android_${this.openudid}_${this.mqttCredentials.user_id}`,
               sign_code: 0,
               timestamp: Date.now(),
               version: '1.0.0.1',
