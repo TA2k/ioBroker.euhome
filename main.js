@@ -473,13 +473,21 @@ class Euhome extends utils.Adapter {
 }
 */
       this.log.debug(`Received message on ${topic}: ${message.toString()}`);
-      const messageParsed = JSON.parse(message.toString());
-      const device = this.deviceArray.find((device) => device.id === messageParsed.payload.device_sn);
+      const messageParse = JSON.parse(message.toString());
+      let payload = messageParse.payload;
+      if (typeof payload === 'string') {
+        try {
+          payload = JSON.parse(payload);
+        } catch (error) {
+          this.log.debug('Payload is not a valid JSON');
+        }
+      }
+      const device = this.deviceArray.find((device) => device.id === payload.device_sn);
       if (!device) {
-        this.log.error(`Device not found for ${messageParsed.payload.device_sn}`);
+        this.log.error(`Device not found for ${payload.device_sn}`);
         return;
       }
-      const data = messageParsed.payload.data;
+      const data = payload.data;
       if (this.dataPoints[device.model]) {
         for (const dataPoint of Object.keys(data)) {
           const dataPointFound = this.dataPoints[device.model].find((dp) => dp.dp_id === parseInt(dataPoint));
