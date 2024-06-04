@@ -547,6 +547,10 @@ class Euhome extends utils.Adapter {
     })
       .then(async (res) => {
         this.log.debug(JSON.stringify(res.data));
+        if (!res.data.data.devices) {
+          this.log.warn('Malformed response');
+          this.log.info(JSON.stringify(res.data));
+        }
         this.log.debug('Found Detailed: ' + res.data.data.devices.length + ' devices');
 
         this.deviceArray = [];
