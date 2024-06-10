@@ -376,8 +376,17 @@ class Euhome extends utils.Adapter {
     })
       .then(async (res) => {
         this.log.debug(JSON.stringify(res.data));
-        this.log.info('Found ' + res.data.devices.length + ' devices via MQTT');
-        for (const device of res.data.devices) {
+        let data = res.data;
+        if (res.data.data) {
+          data = res.data.data;
+        }
+        if (!data.devices) {
+          this.log.error('No devices found');
+          this.log.info(JSON.stringify(res.data));
+          return;
+        }
+        this.log.info('Found ' + data.devices.length + ' devices via MQTT');
+        for (const device of data.devices) {
           await this.extendObjectAsync(device.id, {
             type: 'device',
             common: {
@@ -547,10 +556,7 @@ class Euhome extends utils.Adapter {
     })
       .then(async (res) => {
         this.log.debug(JSON.stringify(res.data));
-        if (!res.data.data.devices) {
-          this.log.warn('Malformed response');
-          this.log.info(JSON.stringify(res.data));
-        }
+
         let devices = res.data.devices;
         if (res.data.data.devices) {
           devices = res.data.data.devices;
