@@ -551,20 +551,24 @@ class Euhome extends utils.Adapter {
           this.log.warn('Malformed response');
           this.log.info(JSON.stringify(res.data));
         }
-        this.log.debug('Found Detailed: ' + res.data.data.devices.length + ' devices');
+        let devices = res.data.devices;
+        if (res.data.data.devices) {
+          devices = res.data.data.devices;
+        }
+        this.log.debug('Found Detailed: ' + devices.length + ' devices');
 
         this.deviceArray = [];
-        for (const deviceObject of res.data.data.devices) {
+        for (const deviceObject of devices) {
           this.deviceArray.push({ id: deviceObject.device.device_sn, model: deviceObject.device.device_model });
           const device = deviceObject.device;
           await this.extendObjectAsync(device.device_sn, {
             type: 'device',
             common: {
-              name: device.device_name,
+              name: device.device_name || device.alias_name || device.name,
             },
             native: {},
           });
-          currentModel = device.device_model;
+          currentModel = device.device_model || device.product.product_code;
           const base64 = [];
           const base64ToHex = [];
           await this.requestClient({
