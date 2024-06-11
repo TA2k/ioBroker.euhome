@@ -561,6 +561,10 @@ class Euhome extends utils.Adapter {
         if (res.data.data.devices) {
           devices = res.data.data.devices;
         }
+        if (!devices) {
+          this.log.error('No detailed devices found');
+          return;
+        }
         this.log.debug('Found Detailed: ' + devices.length + ' devices');
 
         this.deviceArray = [];
