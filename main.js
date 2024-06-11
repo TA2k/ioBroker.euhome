@@ -27,6 +27,7 @@ class Euhome extends utils.Adapter {
     this.on('stateChange', this.onStateChange.bind(this));
     this.on('unload', this.onUnload.bind(this));
     this.deviceArray = [];
+    this.initialDevices = [];
     this.tuyaDevices = {};
     this.devices = {};
     this.tuyaCloud = {};
@@ -386,6 +387,7 @@ class Euhome extends utils.Adapter {
           return;
         }
         this.log.info('Found ' + data.devices.length + ' devices via MQTT');
+        this.initialDevices = data.devices;
         for (const device of data.devices) {
           await this.extendObjectAsync(device.id, {
             type: 'device',
@@ -563,8 +565,18 @@ class Euhome extends utils.Adapter {
         }
         if (!devices) {
           this.log.error('No detailed devices found');
-          this.log.info(JSON.stringify(res.data)
-          return;
+          this.log.info(JSON.stringify(res.data));
+
+          devices = [];
+          for (const device of this.initialDevices) {
+            devices.push({
+              device: {
+                device_sn: device.id,
+                device_model: device.product.product_code,
+                alias_name: device.alias_name,
+              },
+            });
+          }
         }
         this.log.debug('Found Detailed: ' + devices.length + ' devices');
 
