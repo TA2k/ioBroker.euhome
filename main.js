@@ -458,6 +458,8 @@ class Euhome extends utils.Adapter {
       for (const device of this.deviceArray) {
         this.log.debug(`Subscribe to cmd/eufy_home/${device.model}/${device.id}/res`);
         this.mqttClient && this.mqttClient.subscribe(`cmd/eufy_home/${device.model}/${device.id}/res`);
+        this.log.debug(`Subscribe to smart/mb/in//${device.id}`);
+        this.mqttClient && this.mqttClient.subscribe(`smart/mb/in//${device.id}`);
       }
     });
     this.mqttClient.on('message', (topic, message) => {
@@ -904,6 +906,9 @@ class Euhome extends utils.Adapter {
           };
           this.log.debug(`Send ${JSON.stringify(value)} to cmd/eufy_home/${device.model}/${deviceId}/req`);
           this.mqttClient.publish(`cmd/eufy_home/${device.model}/${deviceId}/req`, JSON.stringify(value));
+
+          this.log.debug(`Send ${JSON.stringify(value)} to smart/mb/out/${deviceId}`);
+          this.mqttClient.publish(`smart/mb/out/${deviceId}`, JSON.stringify(value));
           return;
         }
         const device = this.tuyaDevices[deviceId];
