@@ -751,7 +751,7 @@ class Euhome extends utils.Adapter {
           });
         })
         .catch((error) => {
-          this.log.info(
+          this.log.warn(
             `Failed to find to device via local tuya connacetion. please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`,
           );
         });
