@@ -566,18 +566,22 @@ class Euhome extends utils.Adapter {
           devices = res.data.data.devices;
         }
         if (!devices) {
-          this.log.warn('No detailed devices found. Use basic devices');
-          this.log.info(JSON.stringify(res.data));
+          this.log.debug('No detailed devices found. Use basic devices');
+          this.log.debug(JSON.stringify(res.data));
 
           devices = [];
+
+          this.log.debug(JSON.stringify(this.initialDevices));
           for (const device of this.initialDevices) {
-            devices.push({
+            const addDevice = {
               device: {
                 device_sn: device.id,
                 device_model: device.product.product_code,
                 alias_name: device.alias_name,
               },
-            });
+            };
+            this.log.debug('Add device: ' + JSON.stringify(addDevice));
+            devices.push(addDevice);
           }
         }
         this.log.debug('Found Detailed: ' + devices.length + ' devices');
@@ -747,8 +751,8 @@ class Euhome extends utils.Adapter {
           });
         })
         .catch((error) => {
-          this.log.error(
-            `Failed to find to device please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`,
+          this.log.info(
+            `Failed to find to device via local tuya connacetion. please close the app or check your network. Please allow port 6667 and 6666 via UDP from the device IP to 255.255.255.255.  ${error}`,
           );
         });
 
