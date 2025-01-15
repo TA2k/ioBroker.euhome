@@ -258,7 +258,7 @@ class Euhome extends utils.Adapter {
   async login() {
     await this.requestClient({
       method: 'post',
-      url: 'https://home-api.eufylife.com/v1/user/email/login',
+      url: 'https://api.eufylife.com/v1/user/email/login',
       headers: {
         category: 'Home',
         Accept: '*/*',
@@ -267,7 +267,7 @@ class Euhome extends utils.Adapter {
         'Content-Type': 'application/json',
         clientType: '1',
         language: 'de',
-        'User-Agent': 'EufyHome-iOS-2.14.0-6',
+        'user-agent': 'EufyHome-iOS-3.4.15-13',
         timezone: 'Europe/Berlin',
         country: 'DE',
         Connection: 'keep-alive',
@@ -492,6 +492,7 @@ class Euhome extends utils.Adapter {
         try {
           payload = JSON.parse(payload);
         } catch (error) {
+          this.log.debug(error);
           this.log.debug('Payload is not a valid JSON');
         }
       }
@@ -830,6 +831,7 @@ class Euhome extends utils.Adapter {
       this.refreshTokenInterval && clearInterval(this.refreshTokenInterval);
       callback();
     } catch (e) {
+      this.log.error(`Error onUnload: ${e}`);
       callback();
     }
   }

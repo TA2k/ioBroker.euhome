@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "euhome",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "news": {
+      "0.1.6": {
+        "en": "fix login",
+        "de": "zurück zur übersicht",
+        "ru": "исправить логин",
+        "pt": "corrigir login",
+        "nl": "fix login",
+        "fr": "correction de la connexion",
+        "it": "fix login",
+        "es": "corrección de inicio",
+        "pl": "naprawić logowanie",
+        "uk": "фіксувати логін",
+        "zh-cn": "固定登录"
+      },
       "0.1.5": {
         "en": "fix login for new devices",
         "de": "fix login für neue Geräte",
@@ -106,8 +119,14 @@
       "pl": "Adapter do urządzeń eufy Home, takich jak Robovac",
       "zh-cn": "适用于 Robovac 等 eufy Home 设备的适配器"
     },
-    "authors": ["TA2k <tombox2020@gmail.com>"],
-    "keywords": ["eufy", "eufy home", "robovac"],
+    "authors": [
+      "TA2k <tombox2020@gmail.com>"
+    ],
+    "keywords": [
+      "eufy",
+      "eufy home",
+      "robovac"
+    ],
     "license": "MIT",
     "platform": "Javascript/Node.js",
     "main": "main.js",
@@ -140,8 +159,12 @@
       }
     ]
   },
-  "encryptedNative": ["password"],
-  "protectedNative": ["password"],
+  "encryptedNative": [
+    "password"
+  ],
+  "protectedNative": [
+    "password"
+  ],
   "native": {
     "username": "",
     "password": ""
